@@ -69,7 +69,8 @@
 <body>
   <div class="container">
     <h1>Contact Us</h1>
-    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you.html">
+    <form id="contactForm" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field"
+      action="/thank-you.html">
       <!-- Campo oculto requerido por Netlify -->
       <input type="hidden" name="form-name" value="contact">
 
@@ -92,10 +93,53 @@
     </form>
   </div>
 
+  <!-- Include SweetAlert -->
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
   <script>
-    // Optional: Custom form handling or tracking can go here
-    console.log('Form is ready for Netlify!');
+    const form = document.getElementById('contactForm');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault(); // Previene el envío estándar del formulario
+
+      const formData = new FormData(form); // Crea un FormData con los datos del formulario
+
+      // Valida si hay algún campo vacío
+      const isEmpty = Array.from(formData.values()).some((value) => value.trim() === '');
+      if (isEmpty) {
+        swal({
+          title: "Warning",
+          text: "Please complete all required fields.",
+          icon: "warning",
+        });
+        return;
+      }
+
+      // Enviar el formulario manualmente a Netlify
+      fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formData).toString(),
+      })
+        .then(() => {
+          swal({
+            title: "Success",
+            text: "Your message has been sent successfully!",
+            icon: "success",
+          }).then(() => {
+            form.reset(); // Limpia el formulario después de un envío exitoso
+            window.location.href = "/thank-you.html"; // Redirige a la página de agradecimiento
+          });
+        })
+        .catch((error) => {
+          console.error("Error al enviar el formulario:", error);
+          swal({
+            title: "Error",
+            text: "There was an error sending your message. Please try again later.",
+            icon: "error",
+          });
+        });
+    });
   </script>
-</body>
 
 </html>
